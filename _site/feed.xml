@@ -1,10 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>linzhanyu</title>
+		<title>林占宇</title>
 		<description>Stylish Jekyll Theme</description>
 		<link>/</link>
 		<atom:link href="/feed.xml" rel="self" type="application/rss+xml" />
+		
+			<item>
+				<title>LSharp</title>
+				<description>&lt;h1 id=&quot;lsharp&quot;&gt;LSharp&lt;/h1&gt;
+
+&lt;h2 id=&quot;lsharp-&quot;&gt;LSharp 项目工程配置&lt;/h2&gt;
+
+&lt;h3 id=&quot;unity--lsharp-&quot;&gt;Unity 项目中使用 LSharp 需要注意的问题&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;ol&gt;
+    &lt;li&gt;不要在 L# 中定义模板代码
+      &lt;ul&gt;
+        &lt;li&gt;委托不要在 L# 代码中定义&lt;/li&gt;
+        &lt;li&gt;不要在 GameObject 上直接挂 Core 中的代码&lt;/li&gt;
+        &lt;li&gt;L# 和 C# 代码中类型的不同 使用反射时要注意 比如涉及到 typeof 的代码(尽量少用吧.)&lt;/li&gt;
+        &lt;li&gt;func(i++) 这样的代码，i++ 会被先计算，谨慎使用。&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/blockquote&gt;
+
+</description>
+				<pubDate>Wed, 30 Mar 2016 00:00:00 +0800</pubDate>
+				<link>/csharp/lsharp/2016/03/30/lsharp.html</link>
+				<guid isPermaLink="true">/csharp/lsharp/2016/03/30/lsharp.html</guid>
+			</item>
 		
 			<item>
 				<title>Hello World!</title>

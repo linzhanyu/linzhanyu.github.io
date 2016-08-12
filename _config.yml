@@ -7,18 +7,18 @@ highlighter: pygments
 markdown: kramdown
 disqus: linzhanyu
 google_analytics: linzhanyu
-title: linzhanyu
+title: 林占宇
 
 defaults:
   -
     scope:
       path: "" # empty string for all files
     values:
-      title: linzhanyu
+      title: 小蘑菇的奇幻森林
 
 description: Stylish Jekyll Theme
 author:
-  name: 林占宇
+  name: linzhanyu
   email: linzhanyu@gmail.com
   github: linzhanyu
   twitter: linzhanyu
