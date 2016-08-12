@@ -1,8 +1,8 @@
 ---
 layout: post
-title: Test test test!
-categories: [general, setup, demo]
-tags: [demo, linzhanyu, setup]
+title: LSharp
+categories: [CSharp, LSharp]
+tags: [LSharp]
 fullview: true
 comments: true
 ---
