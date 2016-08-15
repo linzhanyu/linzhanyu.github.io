@@ -65,7 +65,7 @@ OpenGL ES 的函数调用中 glDrawElements 负责将三角形的绘制发送给
 
 经过精心对 Static batch 和 Dynamic batch 的安排大部分的游戏项目 DrawCall 数已经能够进入到一个可接受的范围。如果依然很高，说明你的项目内容是比较复杂的了。
 
-剔除操作很重要
+剔除操作很重要，Unity3d 提供的 Occlusion Culling （遮挡易除）是一个非常有用的功能。
 
 #### LOD
 
