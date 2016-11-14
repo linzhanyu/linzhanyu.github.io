@@ -49,7 +49,7 @@ Linux使用了十几年了,从来没有这么折腾过.
 继续 Google !!!
 
 GREAT! EFI 引导时 需要在主板BIOS中设置一下 IOMMU = TRUE.. 可是咱这个 970 的主板上面并没有这个选项. 估计Linux的大神们早就遇到了这个问题, 解决方案是:
-在 grub 中继续添加 kernel 参数  IOMMU=soft 
+在 grub 中继续添加 **kernel 参数 IOMMU=soft**
 
 启动 ...
 
@@ -69,6 +69,10 @@ AMD 官网下载最新的对应驱动.安装即可.
 
 
 ## Happy Func
+
 在用 aticonfig 生成了双显的配置后,稍加修改写到 openSUSE 的配置文件中. 重启 - **十秒开机**. 超赞!
+
+没有尝试在U盘安装时 GRUB 中直接添加 nomodeset iommu=soft 会是什么样的反应.
+
 后面开始装各种库,继续我在 openSUSE 上的开发之路.
 
