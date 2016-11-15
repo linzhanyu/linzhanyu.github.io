@@ -72,7 +72,11 @@ AMD 官网下载最新的对应驱动.安装即可.
 
 在用 aticonfig 生成了双显的配置后,稍加修改写到 openSUSE 的配置文件中. 重启 - **十秒开机**. 超赞!
 
-没有尝试在U盘安装时 GRUB 中直接添加 nomodeset iommu=soft 会是什么样的反应.
+其实在使用U盘安装的时候,直接在GRUB中添加 kernel 参数  **nomodeset iommu=soft** 即可正常用U盘安装了.
+
+另外如果是 ATI 的显卡,如果升级了 kernel 需要启动到文本环境下,再次安装驱动
+
+GRUB 中添加 kernel 参数  **3** 即可直接启动到文本模式
 
 后面开始装各种库,继续我在 openSUSE 上的开发之路.
 
