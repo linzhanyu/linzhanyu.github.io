@@ -36,6 +36,7 @@ Unity 项目中的内存占用主要由 Native Heap, Managed Heap 两部分组�
 Asset Bundle			资源包
 Asset Resource			资源包里的资源文件
 Asset Instantiate		实例化以后的 GameObject 以及上面挂着的各种 Component / Material / Texture 
+![AssetBundle](assets/image/assetbundle.jpg)
 
 #### LUA 部分:
 tolua 的 Lua 是C的, 是不受托管堆管理的,也就是说是在 NativeHeap 中的.但是它的逻辑最终主要是操控某个 GameObject 或者是某个 C# 的 Class Object ,但是 Object 是存在于托管堆中的, 那么也就是说只要 Lua 需要控制, C# 托管堆中的 Object 就得活着. 不能被垃圾回收器自动回收掉.
