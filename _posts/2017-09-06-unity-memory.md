@@ -63,5 +63,11 @@ Lua 给C#中使用回调函数之类会集中在 funcRefMap / delegateMap 中.�
 
 ## 解决
 >1. 代码BUG
+>1.1. 通过观察我们发现C#的 Struct 会在 ObjectTranslator 中产生大量的复制品,如果是每帧会访问多次的Struct建议改为访问Class
+>1.2. 需要在特定的时刻调用 LuaState.RefreshDelegateMap
+
 >2. 框架失误
+>2.1. 在 Delegate 的执行函数中试图从链中删除自己的 Delegate 这是办不到的.
+>2.2. 框架在设计时没有在恰当的时候明确的调用LuaFunction / LuaTable 之类的对象的 Dispose 函数 导致该LUA对象引用的其它的C#对象也不会释放.造成大量的内存泄漏.
+>2.3. 恰当频繁的手动执行LuaGC.
 
