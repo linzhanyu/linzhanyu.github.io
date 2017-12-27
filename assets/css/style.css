@@ -189,3 +189,12 @@ ul.dropdown-menu>li>a>i.fa {
     width: 1.3em;
 }
 
+#footer .outer {
+	padding: 0 30px;
+}
+.footer-left {
+	float:left;
+}
+.footer-right {
+	float:right;
+}
