@@ -65,17 +65,25 @@ OpenGL ES 的函数调用中 glDrawElements 负责将三角形的绘制发送给
 
 经过精心对 Static batch 和 Dynamic batch 的安排大部分的游戏项目 DrawCall 数已经能够进入到一个可接受的范围。如果依然很高，说明你的项目内容是比较复杂的了。
 
-剔除操作很重要，Unity3d 提供的 Occlusion Culling （遮挡易除）是一个非常有用的功能。
+剔除操作很重要，Unity3d 提供的 Occlusion Culling （遮挡剔除）是一个非常有用的功能。
+
+方便且可靠的剔除方式是视矩剔除 Camera.layerCullDistances
 
 #### LOD
 
-那么第一个问题：什么是 LOD ？
+LOD : Level of Detail 的简称, 意思是多细节层次。根据物体模型的节点在显示环境中所处的位置和重要程度，决定物体渲染的资源分配，降低次要垂体的面数和细节，从而提高渲染运算效率。
+
+>1. 模型LOD
+>2. 纹理LOD
+>3. Shader LOD
 
 ## GPU
 
 ### Shader
 
 #### if 到底怎么啦
+
+GPU对代码是并行处理的
 
 ### Texture
 
