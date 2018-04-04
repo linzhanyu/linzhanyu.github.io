@@ -13,7 +13,7 @@ comments: true
 
 :sort
 
-2. 处理该删除的行
+2. 处理该删除的行 （可用）
 
 :sor ur /^/
 
