@@ -9,6 +9,27 @@ comments: true
 
 自从 Unity3d **免费** 以来，非常多的公司个人搭上这只贼船。由于易上手，太多的项目粗枝滥造，不槛入目。经过几个项目的历练，我们来总结一下Unity3D使用过程中应该注意的一些地方吧。希望能起到点作用。
 
+### 优化的目的：
+
+> 1. 保证 FPS
+> 2. 在满足第一点的情况下 画质,工时,效率 这三点进行权衡
+
+### 优化的步骤
+
+> 1. 真机测试看 FPS
+> 2. 看Profiler看CPU运行时间 如果CPU耗时高就是 CPU Bound 否则就是 GPU Bound
+> 3. 如果是 CPU Bound 就打各种 Profiler 细查耗时的函数
+> 4. 如果是 GPU Bound 就用各种厂家提供的检查工具 比如
+* IOS 上可用 XCode GPU capture frame 
+* Android 上可以用 Adreno Profiler 或者 Mali develop tools
+> 5. 如果即不是CPU也不是GPU,那就好玩了,检查一下带宽,尝试打开 mipmap
+
+### 优化的目标
+
+* FPS : 30 电影一般为24帧, 游戏个别时候可能耗时较多,但不要低于20帧
+* MEM : 内存 Reserved Total：150MB。其中：纹理资源：50 MB；网格资源：20 MB；动画片段：15 MB；音频片段：15 MB；Mono堆内存：40 MB；其他：10 MB
+* Load: 场景加载时间 5s
+
 ## CPU
 做游戏 80% 的代码都是跑在 CPU 上的，除了游戏中的逻辑代码需要在CPU做相关计算之外，还有很多图形相关的计算是由CPU驱动的。
 
@@ -88,6 +109,13 @@ LOD : Level of Detail 的简称, 意思是多细节层次。根据物体模型�
 ### GC
 
 ## GPU
+
+### OverDraw
+
+每一段代码都会有它的输入/输出 做为GPU的输出最终就体现在画在屏幕上的像素数量
+
+如果在一帧中大量重复绘制某些像素，就会给GPU造成超负荷劳动。
+
 
 ### Shader
 
