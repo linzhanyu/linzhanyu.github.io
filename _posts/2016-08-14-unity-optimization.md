@@ -86,11 +86,13 @@ OpenGL ES 的函数调用中 glDrawElements 负责将三角形的绘制发送给
 
 经过精心对 Static batch 和 Dynamic batch 的安排大部分的游戏项目 DrawCall 数已经能够进入到一个可接受的范围。如果依然很高，说明你的项目内容是比较复杂的了。
 
-剔除操作很重要，Unity3d 提供的 Occlusion Culling （遮挡剔除）是一个非常有用的功能。
+剔除操作很重要，Unity3d 提供的 Occlusion Culling （遮挡剔除）是一个非常有用的功能。它会耗用CPU时间，如果你只是想通过该功能来减少DrawCall来使CPU使用更高效的话，大多数情况下就可以放弃了。
 
-方便且可靠的剔除方式是视矩剔除 Camera.layerCullDistances
+方便且可靠的剔除方式是视矩剔除 Camera.layerCullDistances 在场景内有大量模型该功能虽然很粗暴但确实可以有效降低 DrawCall，但是太大的场景在模型贴图使用量上必然会更多，Unity自身的场景管理目前还不足以良好地支撑这种方式，大场景如不做特殊处理无法避免内存占用过大。
 
 #### LOD
+
+经常我们要对游戏做远近景的处理，也需要对不同性能的机型做适配处理。这时就应该想到 LOD 的相关使用。
 
 LOD : Level of Detail 的简称, 意思是多细节层次。根据物体模型的节点在显示环境中所处的位置和重要程度，决定物体渲染的资源分配，降低次要垂体的面数和细节，从而提高渲染运算效率。
 
@@ -98,15 +100,36 @@ LOD : Level of Detail 的简称, 意思是多细节层次。根据物体模型�
 >2. 纹理LOD
 >3. Shader LOD
 
+### Animation
+
+UWA 有一篇文章写得很详细了[详细了解](https://blog.uwa4d.com/archives/Optimization_Animation.html)
+
 ### Physics
+
+2017.4 之前的版本还是别用了 Destroy 时会产生不可预料的 Crash
+
+如果你的游戏在CPU使用上已经有些卡顿了就别使用这种效果了
 
 ## IO
 
+网络IO、磁盘IO 都可以称为IO访问，对于CPU来说从发起访问到等待结果送到中间是一个非常慢长的过程，所以可以通过多线程或者协程来减少对CPU时间的浪费。
+
 ## Mem
+
+一般存在于下面几种可能的情况
+
+>1. 数据表太大
+>2. 纹理格式错误使用
+>3. 内存泄漏
 
 ### 托管堆
 
 ### GC
+
+### Lua
+
+[Lua 内存快照](2018-01-24-lua-high-performance.md)
+[Lua 控制Garbage](2018-04-16-lua-garbage.md)
 
 ## GPU
 
@@ -119,9 +142,15 @@ LOD : Level of Detail 的简称, 意思是多细节层次。根据物体模型�
 
 ### Shader
 
+对 Shader 的优化其实极其类似于CPU的优化过程，不外乎几个方面：
+
+>1. 浮点数精度
+>2. 访问的数据是否已经在GPU的缓存中
+>3. 太过复杂的光照计算
+
 #### if 到底怎么啦
 
-GPU对代码是并行处理的
+GPU对代码是并行处理的, 在一部分GPU上会把 if/else 都做计算，然后取其一个分支的结果做为最后的输出。
 
 ### Texture
 
@@ -130,6 +159,9 @@ GPU对代码是并行处理的
 
 ### Bus
 
+GPU 和 CPU 虽然可能共享同一块内存芯片，也可能会使用统一的地址空间，但终归它们是两个计算设备。
 
+>1. 不要在同一帧中频繁访问 FrameBuffer 否则会造非常太的总线带宽压力
+>2. 排除第1项的可能性后，如果Bus依然有压力尝试打开 Mipmap
 
 
