@@ -24,5 +24,18 @@ Unity3D 自从有了Linux版本, 就不用再把开发环境往Windows平台下�
 > sudo ./UnitySetup-xxxx.xx.xxx
 {% endhighlight %}
 
+### 手动安装 不用Hub
+
+目前发布的 2018.3.0f2 无明显BUG使用起来已经非常顺手了。
+
+{% highlight shell %}
+> tar -Jxf Unity.tar.xz
+> tar -Jxf UnitySetup-iOS-Support-for-Editor-2018.3.0f2.tar.xz
+> mkdir Editor/Data/PlaybackEngines/AndroidPlayer
+> cd Editor/Data/PlaybackEngines/AndroidPlayer
+> xar -xf ../../../../UnitySetup-Android-Support-for-Editor-2018.3.0f2.pkg
+> sudo apt install monodevelop
+> Editor/Unity
+{% endhighlight %}
 
 
