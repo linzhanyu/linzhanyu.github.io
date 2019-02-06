@@ -22,7 +22,7 @@ author:
   name: linzhanyu
   email: linzhanyu@gmail.com
   github: linzhanyu
-  weibo: macaqueim
+  facebook: zhanyu.lin.7
   twitter: linzhanyu
   pinterest: linzhanyu
   linkedin: linzhanyu
@@ -43,5 +43,4 @@ url: "https://linzhanyu.github.io"
 plugins:
   - jekyll-sitemap
   - jekyll-paginate
-
 
