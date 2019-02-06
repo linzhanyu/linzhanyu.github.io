@@ -39,5 +39,9 @@ tags_path: tags.html
 
 BASE_PATH:
 
-gems:
+url: "https://linzhanyu.github.io"
+plugins:
+  - jekyll-sitemap
   - jekyll-paginate
+
+
