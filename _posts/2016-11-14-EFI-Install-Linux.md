@@ -1,8 +1,8 @@
 ---
 layout: post
 title: EFI 引导的 GPT 分区如何安装 Linux 
-categories: [linux, efi, gpt, grub2]
-tags: [linux, install]
+categories: [linux]
+tags: [linux, grub2]
 fullview: false
 comments: true
 ---

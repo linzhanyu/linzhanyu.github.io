@@ -128,8 +128,8 @@ UWA 有一篇文章写得很详细了[详细了解](https://blog.uwa4d.com/archi
 
 ### Lua
 
-[Lua 内存快照](2018-01-24-lua-high-performance.md)
-[Lua 控制Garbage](2018-04-16-lua-garbage.md)
+[Lua 内存快照]({% post_url 2018-01-24-lua-high-performance %})
+[Lua 控制Garbage]({% post_url 2018-04-16-lua-garbage %})
 
 ## GPU
 
