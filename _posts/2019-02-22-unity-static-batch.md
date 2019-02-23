@@ -4,6 +4,7 @@ title: Unity Static Batch 原理分析
 categories: [unity3d]
 tags: [unity3d]
 fullview: false
+mermaid: true
 comments: true
 ---
 
