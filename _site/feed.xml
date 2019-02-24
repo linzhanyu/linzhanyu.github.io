@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>林占宇</title>
+		<description>Stylish Jekyll Theme</description>
+		<link>/</link>
+		<atom:link href="/feed.xml" rel="self" type="application/rss+xml" />
+		
+			<item>
+				<title>Unity Static Batch 原理分析</title>
+				<description>&lt;h3 id=&quot;深入分析一下-unity3d-的-static-batch&quot;&gt;深入分析一下 Unity3D 的 Static Batch&lt;/h3&gt;
+
+&lt;h4 id=&quot;为什么要使用-static-batch&quot;&gt;为什么要使用 Static Batch&lt;/h4&gt;
+
+&lt;p&gt;&lt;a href=&quot;/game/unity3d/optimization/2016/08/14/unity-optimization.html&quot;&gt;如前文所说&lt;/a&gt;:降低 DrawCall 减轻 CPU 负担&lt;/p&gt;
+&lt;blockquote&gt;
+
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;static-batch-工作时间点&quot;&gt;Static Batch 工作时间点&lt;/h4&gt;
+
+&lt;blockquote&gt;
+  &lt;ol&gt;
+    &lt;li&gt;&lt;strong&gt;在执行Build的时候&lt;/strong&gt;, 如果你打开 PlayerSettings.StaticBatching 的话, 副作用增加AssetBundle体积&lt;/li&gt;
+    &lt;li&gt;&lt;strong&gt;调用Mesh.CombineMeshes&lt;/strong&gt;, 需要场景中的物体选择了 Static 选项, 并且FBX的打开 Read/Write Enabled. 副作用顶点内存空间占用x2&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;静态合批原理&quot;&gt;静态合批原理&lt;/h4&gt;
+
+&lt;script src=&quot;/assets/js/mermaid.min.js&quot;&gt;&lt;/script&gt;
+&lt;div class=&quot;mermaid&quot;&gt;
+graph TD;
+	模型A--&amp;gt;合批模型1;
+	...  --&amp;gt;合批模型1;
+	模型N--&amp;gt;合批模型1;
+	合批模型1--&amp;gt;渲染A;
+	合批模型1--&amp;gt;渲染A+N;
+	合批模型1--&amp;gt;Vertex_Buffer;
+	渲染A--&amp;gt;MeshA_Vertex;
+	渲染A+N--&amp;gt;MeshA+N_Vertex;
+	Vertex_Buffer--&amp;gt;GPU;
+	MeshA_Vertex--&amp;gt;Rebuild_Index_Buffer;
+	MeshA+N_Vertex--&amp;gt;Rebuild_Index_Buffer;
+	Rebuild_Index_Buffer--&amp;gt;GPU;
+	GPU--&amp;gt;视锥顶点裁剪;
+&lt;/div&gt;
+
+&lt;p&gt;由于静态合批后,各个模型顶点数据被合并成一个大Buffer,但是在场景中某些合批模型并不显示,如何减少这部分三角形的数量?由于是静态合批VertexBuffer是不能变动的.这时就是由Rebuild_Index_Buffer来实现.这样就可以控制可显示模型的三角面在一帧中被绘制.&lt;/p&gt;
+
+&lt;p&gt;剩余的三角形依然很多,有些并不在摄像机范围内.如果绘制必造成对GPU资源的浪费.在GPU中进行视锥裁剪,视锥顶点裁剪的工作原理请看 &lt;a href=&quot;/unity3d/2019/02/22/GLES-Graphics-Pipline.html&quot;&gt;GLES2.0渲染管线&lt;/a&gt;&lt;/p&gt;
+
+</description>
+				<pubDate>Fri, 22 Feb 2019 00:00:00 +0800</pubDate>
+				<link>/unity3d/2019/02/22/unity-static-batch.html</link>
+				<guid isPermaLink="true">/unity3d/2019/02/22/unity-static-batch.html</guid>
+			</item>
+		
+			<item>
+				<title>GLES 渲染管线</title>
+				<description>&lt;h4 id=&quot;gpu-渲染管线&quot;&gt;GPU 渲染管线&lt;/h4&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/image/GLES2_0GraphicsPipline.png&quot; alt=&quot;GLES2.0GraphicsPipeline&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ol&gt;
+    &lt;li&gt;Vertex Array / Buffer Object : 顶点数据来源, 这是渲染管线的顶点输入, 通常使用Buffer Object效率更好&lt;/li&gt;
+    &lt;li&gt;Vertex Shader : &lt;strong&gt;顶点着色器&lt;/strong&gt; 通过可编程方式实现对顶点的操作,如进行坐标转换,计算 per-vertex color以及纹理坐标&lt;/li&gt;
+    &lt;li&gt;Primitive Assembly：&lt;strong&gt;图元装配&lt;/strong&gt;，经过着色器处理之后的顶点在图片装配阶段被装配为基本图元。OpenGL ES 支持三种基本图元：点，线和三角形，它们是可被 OpenGL ES 渲染的。接着对装配好的图元进行&lt;strong&gt;裁剪&lt;/strong&gt;（clip）：保留完全在视锥体中的图元，丢弃完全不在视锥体中的图元，对一半在一半不在的图元进行裁剪；接着再对在视锥体中的图元进行&lt;strong&gt;剔除&lt;/strong&gt;处理（cull）：这个过程可编码来决定是剔除正面，背面还是全部剔除。&lt;/li&gt;
+    &lt;li&gt;Rasterization：&lt;strong&gt;光栅化&lt;/strong&gt;。在光栅化阶段，基本图元被转换为二维的片元(fragment)，fragment 表示可以被渲染到屏幕上的像素，它包含位置，颜色，纹理坐标等信息，这些值是由图元的顶点信息进行插值计算得到的。这些片元接着被送到片元着色器中处理。这是从顶点数据到可渲染在显示设备上的像素的质变过程。&lt;/li&gt;
+    &lt;li&gt;Fragment Shader：&lt;strong&gt;片元着色器&lt;/strong&gt;通过可编程的方式实现对片元的操作。在这一阶段它接受光栅化处理之后的fragment，color，深度值，模版值作为输入。&lt;/li&gt;
+    &lt;li&gt;Per-Fragment Operation：在这一阶段对片元着色器输出的每一个片元进行一系列测试与处理，从而决定最终用于渲染的像素。这一系列处理过程如下：&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/image/PerFragmentOperation.png&quot; alt=&quot;GLES2.0Per-Fragment Operation&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ol&gt;
+    &lt;li&gt;Pixel ownership test：该测试决定像素在 framebuffer 中的位置是不是为当前 OpenGL ES 所有。也就是说测试某个像素是否对用户可见或者被重叠窗口所阻挡&lt;/li&gt;
+    &lt;li&gt;Scissor Test：&lt;strong&gt;剪裁测试&lt;/strong&gt;，判断像素是否在由 glScissor 定义的剪裁矩形内，不在该剪裁区域内的像素就会被剪裁掉&lt;/li&gt;
+    &lt;li&gt;Stencil Test：&lt;strong&gt;模版测试&lt;/strong&gt;，将模版缓存中的值与一个参考值进行比较，从而进行相应的处理&lt;/li&gt;
+    &lt;li&gt;Depth Test：&lt;strong&gt;深度测试&lt;/strong&gt;，比较下一个片段与帧缓冲区中的片段的深度，从而决定哪一个像素在前面，哪一个像素被遮挡&lt;/li&gt;
+    &lt;li&gt;Blending：&lt;strong&gt;混合&lt;/strong&gt;，混合是将片段的颜色和帧缓冲区中已有的颜色值进行混合，并将混合所得的新值写入帧缓冲；&lt;/li&gt;
+    &lt;li&gt;Dithering：&lt;strong&gt;抖动&lt;/strong&gt;，抖动是使用有限的色彩让你看到比实际图象更多色彩的显示方式，以缓解表示颜色的值的精度不够大而导致的颜色剧变的问题。&lt;/li&gt;
+    &lt;li&gt;Framebuffer：这是流水线的最后一个阶段，Framebuffer 中存储这可以用于渲染到屏幕或纹理中的像素值，也可以从Framebuffer 中读回像素值，但不能读取其他值（如深度值，模版值等）。&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/blockquote&gt;
+
+</description>
+				<pubDate>Fri, 22 Feb 2019 00:00:00 +0800</pubDate>
+				<link>/unity3d/2019/02/22/GLES-Graphics-Pipline.html</link>
+				<guid isPermaLink="true">/unity3d/2019/02/22/GLES-Graphics-Pipline.html</guid>
+			</item>
+		
+			<item>
+				<title>Linux 分区压缩备份</title>
+				<description>&lt;p&gt;在日常操作中偶尔会需要用U盘安装一下操作系统，装完后原U盘还希望将U盘中的文件恢复为原来的结构。&lt;/p&gt;
+
+&lt;p&gt;遇到这种问题就可以先用下面的方法备份原U盘中的内容，然后将系统盘镜像写入U盘，用毕再还原U盘镜像。&lt;/p&gt;
+
+&lt;h3 id=&quot;备份&quot;&gt;备份&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo dd &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/sdf |gzip &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;win10_ryzen2.gz
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo dd &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/sdf |pigz &lt;span class=&quot;nt&quot;&gt;-9&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;win10_ryzen2_2.gz
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo dd &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/sdf |pxz &lt;span class=&quot;nt&quot;&gt;-T&lt;/span&gt; 8 &lt;span class=&quot;nt&quot;&gt;-z&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-9&lt;/span&gt; -
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo dd &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/sdf |7z a &lt;span class=&quot;nt&quot;&gt;-si&lt;/span&gt; win10_ryzen2.7z&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;还原&quot;&gt;还原&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;gzip&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-dc&lt;/span&gt; win10_ryzen2.gz |sudo &lt;span class=&quot;nb&quot;&gt;dd &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/sdf
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;pxz &lt;span class=&quot;nt&quot;&gt;-T&lt;/span&gt; 8 &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt; win10_ryzen2.xz |sudo &lt;span class=&quot;nb&quot;&gt;dd &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/sdf
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;7z x &lt;span class=&quot;nt&quot;&gt;-so&lt;/span&gt; win10_ryzen2.7z |sudo &lt;span class=&quot;nb&quot;&gt;dd &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/sdf&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;多线程优化&quot;&gt;多线程优化&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;pigz 是 gzip 的多线程版本&lt;/li&gt;
+  &lt;li&gt;pxz 是 xz 的多线程版本&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;总结&quot;&gt;总结&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;gzip / pigz 压缩速度和内存占用都比较低，但是压缩率也不如 xz 高。低性能配置可以使用。&lt;/li&gt;
+  &lt;li&gt;xz 格式和 7z 都是使用 lzma 压缩算法，压缩率接近。7z 暂无多线程版本，速度略慢。&lt;/li&gt;
+  &lt;li&gt;pxz 有多线程支持,可以利用多线程，加快压缩速度。同时也会使用大量内存。高性能配置可以使用。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;不足&quot;&gt;不足&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;由于U盘中有部分空间并未使用，但使用该备份命令依然会对其进行记录，使得备份文件体积比较大。&lt;/li&gt;
+  &lt;li&gt;如果U盘中的内容不包含引导，直接用压缩命令备份文件目录，备份文件会更小。&lt;/li&gt;
+  &lt;li&gt;当然对于包含引导的磁盘分区，可以单独备份引导扇区，分区表。然后再对需要的分区内文件进行压缩打包备份。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;还原的时候还原引导扇区，分区表，挂载分区，解压文件目录压缩包。
+这个方式就有点类似构建一个大名鼎鼎的 Ghost 了。&lt;/p&gt;
+
+</description>
+				<pubDate>Wed, 06 Feb 2019 00:00:00 +0800</pubDate>
+				<link>/linux/2019/02/06/Linux-clone-disk.html</link>
+				<guid isPermaLink="true">/linux/2019/02/06/Linux-clone-disk.html</guid>
+			</item>
+		
+			<item>
+				<title>GIT 的常见问题</title>
+				<description>&lt;p&gt;GIT 在新手使用过程中会有一些常见的问题，在这里收集整理。&lt;/p&gt;
+
+&lt;h3 id=&quot;windows-系统中的中文文件名乱码&quot;&gt;Windows 系统中的中文文件名乱码&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git config &lt;span class=&quot;nt&quot;&gt;--global&lt;/span&gt; core.quotepath &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;			&lt;span class=&quot;c&quot;&gt;# 显示 status 编码&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git config &lt;span class=&quot;nt&quot;&gt;--global&lt;/span&gt; gui.encoding utf-8            &lt;span class=&quot;c&quot;&gt;# 图形界面编码 &lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git config &lt;span class=&quot;nt&quot;&gt;--global&lt;/span&gt; i18n.commit.encoding utf-8    &lt;span class=&quot;c&quot;&gt;# 提交信息编码&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git config &lt;span class=&quot;nt&quot;&gt;--global&lt;/span&gt; i18n.logoutputencoding utf-8  &lt;span class=&quot;c&quot;&gt;# 输出 log 编码&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;LESSCHARSET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;utf-8
+&lt;span class=&quot;c&quot;&gt;# 最后一条命令是因为 git log 默认使用 less 分页，所以需要 bash 对 less 命令进行 utf-8 编码&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+</description>
+				<pubDate>Tue, 04 Dec 2018 00:00:00 +0800</pubDate>
+				<link>/git/2018/12/04/git.html</link>
+				<guid isPermaLink="true">/git/2018/12/04/git.html</guid>
+			</item>
+		
+			<item>
+				<title>RTS Game Design</title>
+				<description>&lt;h3 id=&quot;什么是rts游戏&quot;&gt;什么是RTS游戏&lt;/h3&gt;
+
+&lt;p&gt;Real-time Strategy 即时战略&lt;/p&gt;
+
+&lt;p&gt;通常会有资源采集，基地建造，科技发展等元素。在玩家的指挥下在不同的时间点做出不同的决策，在资源产出，使用，兵力，驻防点产生万千变化，以营造出游戏内容的丰富多彩。&lt;/p&gt;
+
+&lt;h3 id=&quot;火爆的-rts-游戏有哪些&quot;&gt;火爆的 RTS 游戏有哪些&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;沙丘II -&amp;gt; 魔兽争霸&lt;/li&gt;
+  &lt;li&gt;命令与征服 -&amp;gt; 红色警戒&lt;/li&gt;
+  &lt;li&gt;星际争霸&lt;/li&gt;
+  &lt;li&gt;帝国时代&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;及后来的轻量级(削弱操作)的MOBA类&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;DOTA&lt;/li&gt;
+  &lt;li&gt;英雄联盟&lt;/li&gt;
+  &lt;li&gt;王者荣耀&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;该游戏类型的优点&quot;&gt;该游戏类型的优点&lt;/h3&gt;
+
+&lt;h4 id=&quot;留存高&quot;&gt;留存高&lt;/h4&gt;
+
+&lt;p&gt;成就了一个又一个伟大的游戏公司&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;西木工作室&lt;/li&gt;
+  &lt;li&gt;暴雪娱乐&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;电竟比赛&quot;&gt;电竟比赛&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;难点&quot;&gt;难点&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;数值平衡 —- 程序演算&lt;/li&gt;
+  &lt;li&gt;人机对战 —- 机器学习&lt;/li&gt;
+  &lt;li&gt;多人竞技 —- 竞技性&lt;/li&gt;
+  &lt;li&gt;服务器同步 – 基于帧同步的高并发服务器&lt;/li&gt;
+  &lt;li&gt;客户端操作 – 打破常规&lt;/li&gt;
+  &lt;li&gt;多平台&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;设计&quot;&gt;设计&lt;/h3&gt;
+
+&lt;h4 id=&quot;美术风格卡通化&quot;&gt;美术风格卡通化&lt;/h4&gt;
+
+&lt;h4 id=&quot;核心玩法&quot;&gt;核心玩法&lt;/h4&gt;
+
+&lt;p&gt;战略/战术 为主，加强在防线推进，出奇不意，诱敌入围产生的游戏乐趣。整个游戏过程分三个阶段，削弱堵门，灭队，导致的无法翻盘。&lt;/p&gt;
+
+&lt;h4 id=&quot;包装&quot;&gt;包装&lt;/h4&gt;
+
+&lt;p&gt;与中国传统文化相结合，更容易被接受。&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;人-术 / 仙-道 / 妖-灵&lt;/li&gt;
+  &lt;li&gt;妖&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;成本&quot;&gt;成本&lt;/h3&gt;
+
+&lt;h4 id=&quot;人员&quot;&gt;人员&lt;/h4&gt;
+&lt;h4 id=&quot;时间&quot;&gt;时间&lt;/h4&gt;
+&lt;h4 id=&quot;财务&quot;&gt;财务&lt;/h4&gt;
+
+</description>
+				<pubDate>Fri, 02 Nov 2018 00:00:00 +0800</pubDate>
+				<link>/design/2018/11/02/RTS-Design.html</link>
+				<guid isPermaLink="true">/design/2018/11/02/RTS-Design.html</guid>
+			</item>
+		
+			<item>
+				<title>Linux Unity3D 安装</title>
+				<description>&lt;p&gt;Unity3D 自从有了Linux版本, 就不用再把开发环境往Windows平台下切换了.毕竟Linux才是最适合做开发的集成环境.&lt;/p&gt;
+
+&lt;h3 id=&quot;下载&quot;&gt;下载&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://forum.unity.com/threads/unity-on-linux-release-notes-and-known-issues.350256/page-2&quot;&gt;下载Linux版本&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://public-cdn.cloud.unity3d.com/hub/prod/releases-linux.json&quot;&gt;获取各版本完整安装包下载地址&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;安装&quot;&gt;安装&lt;/h3&gt;
+
+&lt;p&gt;有一系列前置依赖包,按首页提示检查自己的系统中是否安装过.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;chmod&lt;/span&gt; +x UnitySetup-xxxx.xx.xxx
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;sudo&lt;/span&gt; ./UnitySetup-xxxx.xx.xxx&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;手动安装-不用hub&quot;&gt;手动安装 不用Hub&lt;/h3&gt;
+
+&lt;p&gt;目前发布的 2018.3.0f2 无明显BUG使用起来已经非常顺手了。&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;tar&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-Jxf&lt;/span&gt; Unity.tar.xz
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;tar&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-Jxf&lt;/span&gt; UnitySetup-iOS-Support-for-Editor-2018.3.0f2.tar.xz
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;mkdir &lt;/span&gt;Editor/Data/PlaybackEngines/AndroidPlayer
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;Editor/Data/PlaybackEngines/AndroidPlayer
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; xar &lt;span class=&quot;nt&quot;&gt;-xf&lt;/span&gt; ../../../../UnitySetup-Android-Support-for-Editor-2018.3.0f2.pkg
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;monodevelop
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; Editor/Unity&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+</description>
+				<pubDate>Fri, 19 Oct 2018 00:00:00 +0800</pubDate>
+				<link>/linux/2018/10/19/Linux-unity3d.html</link>
+				<guid isPermaLink="true">/linux/2018/10/19/Linux-unity3d.html</guid>
+			</item>
+		
+			<item>
+				<title>Linux SSH 相关</title>
+				<description>&lt;p&gt;SSH 绝对是最适合远程工作的方式，没有之一&lt;/p&gt;
+
+&lt;h3 id=&quot;ssh-copy-id-命令&quot;&gt;ssh-copy-id 命令&lt;/h3&gt;
+
+&lt;p&gt;ssh-copy-id命令可以把本地主机的公钥复制到远程主机的authorized_keys文件上，ssh-copy-id命令也会给远程主机的用户主目录（home）和~/.ssh, 和~/.ssh/authorized_keys设置合适的权限。&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;ssh-copy-id &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;identity_file]] &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;user@]machine&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h4 id=&quot;选项&quot;&gt;选项&lt;/h4&gt;
+
+&lt;p&gt;-i：指定公钥文件&lt;/p&gt;
+
+&lt;h4 id=&quot;示例&quot;&gt;示例&lt;/h4&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;ssh-copy-id &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; ~/.ssh/id_rsa.pub Mac@10.10.30.16&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+</description>
+				<pubDate>Tue, 09 Oct 2018 00:00:00 +0800</pubDate>
+				<link>/linux/2018/10/09/Linux-ssh.html</link>
+				<guid isPermaLink="true">/linux/2018/10/09/Linux-ssh.html</guid>
+			</item>
+		
+			<item>
+				<title>Linux 主机间断点续传</title>
+				<description>&lt;p&gt;Linux 主机间传输文件马上想到的是 scp.
+但当要传送文件较大,过程中如果网络中断了,就比较悲剧了.
+这时候可以考虑使用 rsync 命令替代 scp, 可实现断点续传.&lt;/p&gt;
+
+&lt;h3 id=&quot;需求--本地文件夹-pwddb-传输到-1921685050-指定-ssh-端口为-22300&quot;&gt;需求 : 本地文件夹 PwdDB 传输到 192.168.50.50 指定 SSH 端口为 22300&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;rsync &lt;span class=&quot;nt&quot;&gt;-rP&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--rsh&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;ssh /mnt/mysql/PwdDB linzhanyu@192.168.50.50:22300/mnt/mysql/PwdDB&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+</description>
+				<pubDate>Fri, 21 Sep 2018 00:00:00 +0800</pubDate>
+				<link>/linux/2018/09/21/Linux-scp.html</link>
+				<guid isPermaLink="true">/linux/2018/09/21/Linux-scp.html</guid>
+			</item>
+		
+			<item>
+				<title>Linux 硬盘操作</title>
+				<description>&lt;h3 id=&quot;查看磁盘情况&quot;&gt;查看磁盘情况&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;lsblk&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;查看分区&quot;&gt;查看分区&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;所有磁盘：sudo fdisk &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt;
+        ：sudo parted &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt;
+指定磁盘：sudo fdisk &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt; /dev/sda&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;mbr-分区&quot;&gt;MBR 分区&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;parted /dev/sdb
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; mklable mbr
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; mkpart
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; mkpart name startMB endMB &lt;span class=&quot;c&quot;&gt;# 建立分区&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;gpt-分区&quot;&gt;GPT 分区&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# sudo parted /dev/sdb&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; mklable gpt
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; mkpart&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;格式化&quot;&gt;格式化&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;mkfs.ext4  /dev/sdXN
+mkfs.btrfs
+mkfs.vfat
+mkfs.ntfs&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;挂载&quot;&gt;挂载&lt;/h3&gt;
+
+&lt;h4 id=&quot;etcfstab-格式&quot;&gt;/etc/fstab 格式&lt;/h4&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# &amp;lt;file system&amp;gt; &amp;lt;mount point&amp;gt;   &amp;lt;type&amp;gt;  &amp;lt;options&amp;gt;       &amp;lt;dump&amp;gt;  &amp;lt;pass&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;UUID&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;25c15e03-dbca-4da4-bba9-73f168f28adf /mnt/disk        ext4    acl,async,noatime,user_xattr  0       2
+&lt;span class=&quot;nv&quot;&gt;UUID&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;82928471AA8BFC78		          /mnt/data       ntfs-3g auto,user,noexec,async,noatime,users,uid&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1000,gid&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;users&lt;/span&gt;,umask&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;133,dmask&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;022,locale&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;zh_CN.UTF-8 0 0&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h4 id=&quot;ssd-性能优化&quot;&gt;SSD 性能优化&lt;/h4&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;btrfs : ssd,noatime,discard
+ext4  : noatime,discard&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h4 id=&quot;smb-共享挂载&quot;&gt;SMB 共享挂载&lt;/h4&gt;
+
+&lt;h3 id=&quot;坏道修复&quot;&gt;坏道修复&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;检查：smartctl &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt; selftest /dev/sda
+卸载：umount /dev/sda&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;
+检查：badblocks /dev/sda
+修复：fsck &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; ext4 &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt; /dev/sda&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+</description>
+				<pubDate>Tue, 11 Sep 2018 00:00:00 +0800</pubDate>
+				<link>/linux/2018/09/11/Linux-hdd.html</link>
+				<guid isPermaLink="true">/linux/2018/09/11/Linux-hdd.html</guid>
+			</item>
+		
+			<item>
+				<title>Linux 命令行关机，重启，待机，休眠</title>
+				<description>&lt;h3 id=&quot;关机&quot;&gt;关机&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;halt
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;init 0
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;shutdown &lt;span class=&quot;nt&quot;&gt;-h&lt;/span&gt; now
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;shutdown &lt;span class=&quot;nt&quot;&gt;-h&lt;/span&gt; 0&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;定时延时关机&quot;&gt;定时/延时关机&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;shutdown &lt;span class=&quot;nt&quot;&gt;-h&lt;/span&gt; 19:00
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;shutdown &lt;span class=&quot;nt&quot;&gt;-h&lt;/span&gt; +30    &lt;span class=&quot;c&quot;&gt;## 单位为分钟&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;重启&quot;&gt;重启&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;reboot
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;init 6
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;shutdown &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; now&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;待机&quot;&gt;待机&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;pm-suspend
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;pm-suspend-hybrid
+&lt;span class=&quot;nb&quot;&gt;sudo echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;mem&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;/sys/power/state
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;hibernate-ram&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;休眠&quot;&gt;休眠&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;pm-hibernate
+&lt;span class=&quot;nb&quot;&gt;sudo echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;disk&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;/sys/power/state
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;hibernate-disk&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+</description>
+				<pubDate>Mon, 27 Aug 2018 00:00:00 +0800</pubDate>
+				<link>/linux/2018/08/27/Linux-hibernate.html</link>
+				<guid isPermaLink="true">/linux/2018/08/27/Linux-hibernate.html</guid>
+			</item>
+		
+	</channel>
+</rss>
