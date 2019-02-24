@@ -3,7 +3,31 @@
 </div>
 	
 <article>
-
+		
+	{% if page.mermaid == true %}
+	<!-- <script> -->
+	  <!-- window.Lazyload.js('https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.0.0/mermaid.min.js', function() { -->
+	    <!-- mermaid.initialize({ -->
+	      <!-- startOnLoad: true -->
+	    <!-- }); -->
+	    <!-- mermaid.init(undefined, '.language-mermaid'); -->
+	  <!-- }); -->
+	<!-- </script> -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.0.0/mermaid.min.js"></script>
+	<script>
+	var config = {
+	    startOnLoad:true,
+	    theme: 'forest',
+	    flowchart:{
+	            useMaxWidth:false,
+	            htmlLabels:true
+	        }
+	};
+	mermaid.initialize(config);
+	mermaid.init(undefined, '.language-mermaid');
+	</script>
+	{% endif %}
+		
 	<div class="col-sm-10">
 	 <span class="post-date">
 	   {% assign d = page.date | date: "%d" | plus:'0' %}
@@ -70,6 +94,7 @@
 		{% endunless %}  
 
 		<hr>
+
 
       <div class="reward">
       	<div class="reward-button">赏 <span class="reward-code">
