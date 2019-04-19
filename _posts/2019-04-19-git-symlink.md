@@ -9,17 +9,26 @@ comments: true
 
 不得不先吐槽一下 Win10 这个运行权限搞得越来越不爽了.
 
-#### 先解决烦人的权限问题
+### 先解决烦人的权限问题
 
 ![Win10.AdminRun](/assets/image/AdminRun.png)
 
 重启后可以从根本上解决掉以管理员运行的问题
 
-#### 添加命令别名
+### 添加命令别名
 
 [参考资料](http://stackoverflow.com/a/16754068)
 
-##### 在 Windows 上创建 symlink
+#### 让Win仓库支持 symlink
+
+1. 安装 GIT 时需要选择 support symlink
+1. clone 仓库的时候使用如下命令
+
+{% highlight shell %}
+git clone -c core.symlinks=true <URL>
+{% endhighlight %}
+
+#### 在 Windows 上创建 symlink
 {% highlight shell %}
 git config --global alias.add-symlink '!'"$(cat <<'ETX'
 __git_add_symlink() {
@@ -70,7 +79,7 @@ ETX
 )"
 {% endhighlight %}
 
-Usage: git add-symlink <source_file_or_dir> <target_symlink>
+Usage: git add-symlink [source_file_or_dir] [target_symlink]
 
 ##### 删除 symlink
 
