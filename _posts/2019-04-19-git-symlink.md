@@ -15,12 +15,10 @@ comments: true
 
 重启后可以从根本上解决掉以管理员运行的问题
 
-### 添加命令别名
-
 #### 让Win仓库支持 symlink
 
 1. 安装 GIT 时需要选择 support symlink
-1. clone 仓库的时候使用如下命令
+1. clone 仓库的时候使用如下命令 **这一点很重要**
 
 {% highlight shell %}
 git clone -c core.symlinks=true <URL>
@@ -39,7 +37,10 @@ del target
 rd target
 {% endhighlight %}
 
+
 ### 复杂一点做成一个 alias 好像没有必要
+
+#### 添加命令别名
 
 [参考资料](http://stackoverflow.com/a/16754068)
 
