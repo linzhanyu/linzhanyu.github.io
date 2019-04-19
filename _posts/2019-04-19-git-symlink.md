@@ -17,8 +17,6 @@ comments: true
 
 ### 添加命令别名
 
-[参考资料](http://stackoverflow.com/a/16754068)
-
 #### 让Win仓库支持 symlink
 
 1. 安装 GIT 时需要选择 support symlink
@@ -27,6 +25,23 @@ comments: true
 {% highlight shell %}
 git clone -c core.symlinks=true <URL>
 {% endhighlight %}
+
+#### 在 Windows 上创建 symlink
+
+{% highlight shell %}
+# 文件链接
+mklink target source
+# 目录链接
+mklink /d target source
+# 删除文件链接
+del target
+# 删除目录链接
+rd target
+{% endhighlight %}
+
+### 复杂一点做成一个 alias 好像没有必要
+
+[参考资料](http://stackoverflow.com/a/16754068)
 
 #### 在 Windows 上创建 symlink
 {% highlight shell %}
