@@ -7,7 +7,9 @@ fullview: false
 comments: true
 ---
 
-不得不先吐槽一下 Win10 这个运行权限搞得越来越不爽了.
+想在Windows上的Git中使用符号链接时,需要做一些特殊的工作.这个问题源于Windows自身,Linux & MacOSX不存在这些问题.
+
+首先不得不先吐槽一下 Win10 这个运行权限搞得越来越不爽了.
 
 ### 先解决烦人的权限问题
 
