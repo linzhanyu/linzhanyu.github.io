@@ -20,3 +20,13 @@ comments: true
 ### 将指定文件夹换成指定分支中的版本
 
 
+### Tag 操作
+#### 添加 TAG
+
+git tag -a v1.0.1.1 commit-id
+
+
+#### 删除 TAG
+
+git tag -d v1.0.1.1
+
