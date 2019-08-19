@@ -43,6 +43,22 @@ git push origin local_branch_name:remote_branch_name
 
 ### 合并Commit
 
+1. 从HEAD版本开始往过去数三个版本
+{% highlight shell %}
+git rebase -i HEAD~3
+{% endhighlight %}
+
+2. 指定要合并之前的版本号
+{% highlight shell %}
+git rebase -i commitId
+{% endhighlight %}
+
+### 某个 Commit 所属的分支
+
+{% highlight shell %}
+git branch --contains commitId
+{% endhighlight %}
+
 ### 合并分支
 
 {% highlight shell %}
@@ -90,4 +106,11 @@ git tag -d v1.0.1.1
 git push origin v1.0.1.1
 git push origin --tags
 {% endhighlight %}
+
+### git 全用指定的密钥
+
+{% highlight shell %}
+git config core.sshCommand "ssh -i ~/.ssh/id_rsa_example -F /dev/null"
+{% endhighlight %}
+
 
