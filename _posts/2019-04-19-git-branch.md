@@ -85,6 +85,7 @@ git cherry-pick commitId0 .. commitIdN
 git log --oneline --walk-reflogs branch-name
 {% endhighlight %}
 
+---
 
 ### Tag 操作
 #### 添加 TAG
@@ -106,6 +107,19 @@ git tag -d v1.0.1.1
 git push origin v1.0.1.1
 git push origin --tags
 {% endhighlight %}
+
+---
+
+### stash 相关
+
+#### 查看 stash 保存的内容
+
+{% highlight shell %}
+git stash show -p
+git stash show -p stash@{1}
+{% endhighlight %}
+
+---
 
 ### git 全用指定的密钥
 
