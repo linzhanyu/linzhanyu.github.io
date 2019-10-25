@@ -38,6 +38,18 @@ git branch -d  branch-name
 git push origin :remote_branch_name
 {% endhighlight %}
 
+#### 查看分支追踪情况
+
+{% highlight shell %}
+git remote show origin
+{% endhighlight %}
+
+#### 本地同步远端已被删除的分支
+
+{% highlight shell %}
+git remote prune origin
+{% endhighlight %}
+
 ---
 
 ### 将本地分支推到远程如果不存在就创建
@@ -109,6 +121,12 @@ git tag -a v1.0.1.1 commit-id
 
 {% highlight shell %}
 git tag -d v1.0.1.1
+{% endhighlight %}
+
+#### 删除远程 TAG
+
+{% highlight shell %}
+git push origin :refs/tags/v1.0.1.1
 {% endhighlight %}
 
 #### 推送 TAG
