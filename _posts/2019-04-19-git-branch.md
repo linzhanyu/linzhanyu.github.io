@@ -79,6 +79,30 @@ git branch --contains commitId
 {% endhighlight %}
 
 ---
+### 对比两个分支的差异
+
+
+#### 显示两个分支的差异文件列表
+
+{% highlight shell %}
+git diff branch1 branch2 --stat
+{% endhighlight %}
+
+#### 显示指定文件的详细差异
+
+{% highlight shell %}
+git diff branch1 branch2 filePath
+{% endhighlight %}
+
+#### 显示所有文件的详细差异
+
+{% highlight shell %}
+git diff branch1 branch2
+{% endhighlight %}
+
+
+
+---
 ### 合并分支
 
 {% highlight shell %}
@@ -140,11 +164,33 @@ git push origin --tags
 
 ### stash 相关
 
+#### 把工作区中的修改藏起来
+{% highlight shell %}
+git stash push -m "message"
+git stash save
+git stash store
+{% endhighlight %}
+
 #### 查看 stash 保存的内容
 
 {% highlight shell %}
+git stash list
 git stash show -p
 git stash show -p stash@{1}
+{% endhighlight %}
+
+#### 把 stash 中的内容还原出来
+
+{% highlight shell %}
+git stash pop
+git stash apply
+{% endhighlight %}
+
+#### 把 stash 中的内容清除掉
+
+{% highlight shell %}
+git stash clear
+git stash drop
 {% endhighlight %}
 
 ---
