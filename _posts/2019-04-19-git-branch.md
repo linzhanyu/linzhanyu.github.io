@@ -7,7 +7,8 @@ fullview: false
 comments: true
 ---
 
-分支常用操作
+GIT的分支是众多版本管理软件中最好用的,没有之一.在创建,同步,合并过程中都显示出其设计的优越性.这里主要记录一些和分支相关的操作.
+
 ---
 
 ### 创建分支
@@ -222,5 +223,68 @@ git remote remove name
 {% highlight shell %}
 git remote rename <old> <new>
 {% endhighlight %}
+
+---
+
+### SubModule 使用
+
+#### 1. 添加
+
+{% highlight shell %}
+git submodule add git-url path
+{% endhighlight %}
+
+***
+#### 2. 使用
+
+在已经添加了子模块的仓库拉取之后需要用下面的方式将子模块中的代码同步到本地.
+{% highlight shell %}
+git submodule init
+git submodule update
+{% endhighlight %}
+
+或者:
+
+{% highlight shell %}
+git submodule update --init --recursive
+{% endhighlight %}
+
+***
+#### 3. 更新
+
+子模块的维护者提交了更新以后,使用子模块的项目必须手动更新才能包含最新提交.
+
+进入到子模块目录下执行 __git pull__ 更新, 然后在项目目录中 __git add__ 提交即可.
+
+统一更新全部子模块
+
+{% highlight shell %}
+git submodule foreach git pull
+{% endhighlight %}
+
+引用的子模块可以锚定在某一个 commit 或者某一个特定的分支上,使用维护起来非常方便.
+
+***
+#### 4. 删除子模块
+
+这个操作不多见,但是遇到了就挺烧脑的.
+
+- 删除子模块目录
+{% highlight shell %}
+rm -rf 子模块目录
+{% endhighlight %}
+
+- 打开 __.gitmodules__ 删除相关条目
+- 打开 __.git/config__ 删除配置中子模块相关条目
+- 删除 __.git/module/__中的对应目录. 每一个子模块在该目录下会有一个对应的目录 只删除对应的子模块目录即可
+{% highlight shell %}
+rm -rf .git/module/... 
+{% endhighlight %}
+- 删除缓存区的子模块相关内容
+{% highlight shell %}
+git rm --cached 子模块名
+{% endhighlight %}
+
+- 完成删除后提交到仓库即可.
 
 
