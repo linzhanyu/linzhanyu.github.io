@@ -31,5 +31,11 @@ comments: true
 :v/xxxx/d
 {% endhighlight %}
 
+### 将文本列对齐
+
+{% highlight vim %}
+:n,m!column -t
+{% endhighlight %}
+
 
 
