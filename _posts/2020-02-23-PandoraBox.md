@@ -2,7 +2,7 @@
 layout: post
 title: PandoraBox 常用配置
 categories: [linux]
-tags: [linux]
+tags: [linux, openwrt]
 fullview: false
 comments: true
 ---

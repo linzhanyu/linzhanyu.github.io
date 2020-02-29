@@ -1,8 +1,8 @@
 ---
 layout: post
 title: Windows10 中启用 openSSH Server 功能
-categories: [git]
-tags: [git]
+categories: [ssh]
+tags: [ssh, win10]
 fullview: false
 comments: true
 ---

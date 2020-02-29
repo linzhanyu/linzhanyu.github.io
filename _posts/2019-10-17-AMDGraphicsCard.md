@@ -1,8 +1,8 @@
 ---
 layout: post
 title: AMD Graphics Card
-categories: [amd]
-tags: [amd]
+categories: [hardware]
+tags: [hardware]
 fullview: false
 comments: true
 ---
