@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Support Vector Machine
-categories: [Theano]
+title: scikit-learn
+categories: [sklearn]
 tags: [OpenCL]
 fullview: false
 comments: true
