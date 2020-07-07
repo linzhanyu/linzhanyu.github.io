@@ -224,6 +224,24 @@ git remote remove name
 git remote rename <old> <new>
 {% endhighlight %}
 
+#### 裸仓库
+
+{% highlight shell %}
+git clone --bare git-url
+{% endhighlight %}
+
+#### 更新祼仓库
+
+{% highlight shell %}
+git fetch origin +refs/heads/*:refs/heads/* --prune
+{% endhighlight %}
+
+#### 镜像推送
+
+{% highlight shell %}
+git push --mirror <remote-repo>
+{% endhighlight %}
+
 ---
 
 ### SubModule 使用
