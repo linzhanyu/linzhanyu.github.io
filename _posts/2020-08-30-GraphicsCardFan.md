@@ -16,3 +16,22 @@ cd /sys/class/drm/card0/device/hwmon/hwmon1
 echo 1 | sudo tee fan1_enable
 echo 90 | sudo tee pwm1
 {% endhighlight %}
+
+#### 后记
+
+到底是哪里出了问题? 最近系统更新后,又出现了频繁的死机
+
+dmsg 查看发现有一处 Crash 和 edac 驱动有关系
+
+这个驱动是服务器内存ECC校验用的,咱的内存也没有这个功能,先屏蔽了它试试:
+
+{% highlight shell %}
+sudo vim /etc/modprobe.d/backlist.conf
+{% endhighlight %}
+
+中加入以下内容:
+{% highlight conf %}
+blacklist amd64_edac_mod
+{% endhighlight %}
+
+目前为止已经稳定的运行了几天了,甚好!
