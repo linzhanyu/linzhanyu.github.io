@@ -17,6 +17,10 @@ sudo sed -i 's/cn.archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list
 
 #### 自己搭建 APT 源镜像
 
+使用 apt-mirror 可以非常容易地搭建本地镜像
+
+配置文件路径 /etc/apt/mirror.conf
+
 {% highlight conf %}
 ############# config ##################
 #
