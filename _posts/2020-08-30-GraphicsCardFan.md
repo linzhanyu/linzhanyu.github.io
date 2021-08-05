@@ -22,6 +22,8 @@ echo 90 | sudo tee pwm1
 {% endhighlight %}
 
 
+---
+
 #### 第二次频繁死机
 
 到底是哪里出了问题? 最近系统更新后,又出现了频繁的死机
@@ -40,6 +42,9 @@ blacklist amd64_edac_mod
 {% endhighlight %}
 
 目前为止已经稳定的运行了几天了,甚好!
+
+
+---
 
 #### 第三次偶发死机
 
