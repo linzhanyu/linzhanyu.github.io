@@ -8,24 +8,35 @@ comments: true
 ---
 
 C# program that implements lowercase optimization
+
+
+{% highlight log %}
+Optimized ways to lowercase characters:
+char.ToLower: 10704 ms   (Framework)
+ToLowerIf:     1231 ms   (If-statement)
+ToLowerFast:    563 ms   (Lookup table)
+
+{% endhighlight %}
+
+
 {% highlight cshape %}
 public static class Program
 {
     static string _lookupStringL;
     static string _lookupStringU;
-
+ 
     public static char ToLowerFast(char c)
     {
         // Use char lookup table.
         return _lookupStringL[c];
     }
-
+ 
     public static char ToUpperFast(char c)
     {
         // Use char lookup table.
         return _lookupStringU[c];
     }
-
+ 
     public static char ToLowerFastIf(char c)
     {
         // Use if-statement.
@@ -38,7 +49,7 @@ public static class Program
             return c;
         }
     }
-
+ 
     public static char ToUpperFastIf(char c)
     {
         // Use if-statement.
@@ -51,7 +62,7 @@ public static class Program
             return c;
         }
     }
-
+ 
     public static void Main()
     {
         // Init the strings.
@@ -71,10 +82,10 @@ public static class Program
                 uData[i] = ToUpperFastIf(value);
             }
         }
-
+ 
         _lookupStringL = new string(lData);
         _lookupStringU = new string(uData);
-
+ 
         // Test the char transformation methods.
         string phrase = "Is it a BIRD?";
         char[] array = phrase.ToCharArray();
@@ -88,8 +99,3 @@ public static class Program
     }
 }
 {% endhighlight %}
-
-Optimized ways to lowercase characters:
-char.ToLower: 10704 ms   (Framework)
-ToLowerIf:     1231 ms   (If-statement)
-ToLowerFast:    563 ms   (Lookup table)

@@ -16,7 +16,7 @@ Number of platforms                               1
   Platform Profile                                EMBEDDED_PROFILE
   Platform Extensions                             cl_khr_il_program cl_khr_spir cl_khr_create_command_queue cl_altera_device_temperature cl_altera_live_object_tracking cl_khr_icd cl_vc4cl_performance_counters
   Platform Extensions function suffix             VC4CL
-
+ 
   Platform Name                                   OpenCL for the Raspberry Pi VideoCore IV GPU
 Number of devices                                 1
   Device Name                                     VideoCore IV GPU
@@ -40,7 +40,7 @@ Number of devices                                 1
   Max work item dimensions                        3
   Max work item sizes                             12x12x12
   Max work group size                             12
-
+ 
   Preferred work group size multiple              1
   Preferred / native vector sizes                 
     char                                                16 / 16      
@@ -90,7 +90,7 @@ Number of devices                                 1
   printf() buffer size                            0
   Built-in kernels                                (n/a)
   Device Extensions                               cl_khr_global_int32_base_atomics cl_khr_global_int32_extended_atomics cl_khr_local_int32_base_atomics cl_khr_local_int32_extended_atomics cl_khr_byte_addressable_store cl_nv_pragma_unroll cl_arm_core_id cl_ext_atomic_counters_32 cl_khr_initialize_memory cl_arm_integer_dot_product_int8 cl_arm_integer_dot_product_accumulate_int8 cl_arm_integer_dot_product_accumulate_int16 cl_arm_integer_dot_product_accumulate_saturate_int8 cl_khr_il_program cl_khr_spir cl_khr_create_command_queue cl_altera_device_temperature cl_altera_live_object_tracking cl_khr_icd cl_vc4cl_performance_counters
-
+ 
 NULL platform behavior
   clGetPlatformInfo(NULL, CL_PLATFORM_NAME, ...)  OpenCL for the Raspberry Pi VideoCore IV GPU
   clGetDeviceIDs(NULL, CL_DEVICE_TYPE_ALL, ...)   Success [VC4CL]
@@ -107,7 +107,7 @@ NULL platform behavior
   clCreateContextFromType(NULL, CL_DEVICE_TYPE_ALL)  Success (1)
     Platform Name                                 OpenCL for the Raspberry Pi VideoCore IV GPU
     Device Name                                   VideoCore IV GPU
-
+ 
 ICD loader properties
   ICD loader Name                                 OpenCL ICD Loader
   ICD loader Vendor                               OCL Icd free software
