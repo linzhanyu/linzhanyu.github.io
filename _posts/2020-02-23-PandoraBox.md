@@ -61,11 +61,32 @@ pinstance proxy1: "eth0.2" ==> "br-lan";
 
 ![IPv6-LAN](/assets/image/udpxySetting.png)
 
+{% highlight conf %}
+config udpxy
+        option verbose '0'
+        option status '1'
+        option bind '192.168.10.1'
+        option port '8012'
+        option source 'eth0.2'
+        option max_clients '3'
+        option log_file '/var/log/udpxy'
+        option buffer_size '1048576'
+        option buffer_messages '3'
+        # option buffer_time '-1'
+        # option nice_increment '0'
+        # option mcsub_renew '0'
+{% endhighlight %}
+
+重启udpxy
+/etc/init.d/udpxy restart
+
 #### 查看 udpxy 状态
 
 [udpxy-status](http://192.168.10.1:8012/status)
 
 #### 配置防火墙
+
+/etc/config/firewall
 
 {% highlight conf %}
 config rule                             
