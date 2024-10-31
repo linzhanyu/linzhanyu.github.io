@@ -112,6 +112,12 @@ git pull
 git merge origin/other-branch-name
 {% endhighlight %}
 
+### 合并分支但不形成 merge commit
+{% highlight shell %}
+git fetch origin
+git checkout target-branch-name
+git merget --no-commit source-branch-name
+{% endhighlight %}
 ---
 ### 从其它分支抓取 Commit
 
