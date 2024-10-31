@@ -116,7 +116,7 @@ git merge origin/other-branch-name
 {% highlight shell %}
 git fetch origin
 git checkout target-branch-name
-git merget --no-commit source-branch-name
+git merge --no-commit source-branch-name
 {% endhighlight %}
 ---
 ### 从其它分支抓取 Commit
