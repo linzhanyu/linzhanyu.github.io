@@ -23,4 +23,8 @@ sudo vim /usr/share/X11/xorg.conf.d/10-nvidia.conf
 Option     "Coolbits" "4"
 ```
 
+```bash
+nvidia-settings  -a "[fan:0]/GPUTargetFanSpeed=50"
+```
+
 
